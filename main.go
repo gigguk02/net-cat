@@ -28,21 +28,24 @@ _)      \.___.,|     .'
 \____   )MMMMMP|   .'
      '-'       '--'
 `
+var (
+	join          = make(chan mes)
+	channel       = make(chan mes)
+	leaving       = make(chan mes)
+	history       string
+	numberOfUsers = 0
 
-// var channel = make(chan string)
-var chan01 = make(chan string)
-var channel = make(chan mes)
-var mutex sync.Mutex
+	mutex sync.Mutex
+)
 
 type mes struct {
 	name,
-	historyMes,
 	text,
-	addr string
+	addr,
+	ourTime string
 }
 
 func main() {
-
 	args := os.Args[1:]
 	var port string
 	switch len(args) {
@@ -72,11 +75,23 @@ func main() {
 	defer listener.Close()
 	for {
 		conn, err := listener.Accept()
-		if err != nil {
-			fmt.Println(err)
-			return
+		mutex.Lock()
+		numberOfUsers++
+		mutex.Unlock()
+		if numberOfUsers <= 10 {
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			go Handle(conn)
+
+		} else {
+			conn.Write([]byte("Chat is full. Try again later!"))
+			mutex.Lock()
+			numberOfUsers--
+			mutex.Unlock()
+
 		}
-		go Handle(conn)
 
 	}
 }
