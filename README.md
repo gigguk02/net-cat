@@ -72,5 +72,5 @@ Used only:
 - reflect
 
 
-## Authors
+## Author
 [@gbekbola](https://01.alem.school/git/gbekbola)
